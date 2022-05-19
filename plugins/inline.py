@@ -47,7 +47,7 @@ async def answer(bot, query):
         file_type = None
 
     offset = int(query.offset or 0)
-    reply_markup = get_reply_markup(bot.username, query=string)
+    reply_markup = get_reply_markup(bot=username, query=string)
     files, next_offset, total = await get_search_results(string,
                                                   file_type=file_type,
                                                   max_results=10,
@@ -79,7 +79,7 @@ async def answer(bot, query):
             switch_pm_text += f" for {string}"
         try:
             await query.answer(results=results,
-                           is_personal = True,
+                           is_personal = False,
                            cache_time=cache_time,
                            switch_pm_text=switch_pm_text,
                            switch_pm_parameter="start",
@@ -90,11 +90,9 @@ async def answer(bot, query):
             logging.exception(str(e))
     else:
         switch_pm_text = f'{emoji.CROSS_MARK} Silahkan Request!'
-        if string:
-            switch_pm_text += f' for "{string}"'
 
         await query.answer(results=[],
-                           is_personal = True,
+                           is_personal = False,
                            cache_time=cache_time,
                            switch_pm_text=switch_pm_text,
                            switch_pm_parameter="okay")
