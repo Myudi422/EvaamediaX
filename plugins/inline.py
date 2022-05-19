@@ -26,7 +26,7 @@ async def inline_users(query: InlineQuery):
 async def answer(bot, query):
     """Show search results for given inline query"""
     
-    if not await inline_users(query):
+    if not await inline_users(bot, query):
         await query.answer(results=[],
                            cache_time=0,
                            switch_pm_text='okDa',
@@ -42,16 +42,16 @@ async def answer(bot, query):
 
     results = []
     if '|' in query.query:
-        string, file_type = query.query.split('|', maxsplit=1)
-        string = string.strip()
+        text, file_type = query.query.split('|', maxsplit=1)
+        text = text.strip()
         file_type = file_type.strip().lower()
     else:
-        string = query.query.strip()
+        text = query.query.strip()
         file_type = None
 
     offset = int(query.offset or 0)
-    reply_markup = get_reply_markup(bot, query=string)
-    files, next_offset, total = await get_search_results(string,
+    reply_markup = get_reply_markup(bot.username, query=text)
+    files, next_offset, total = await get_search_results(text,
                                                   file_type=file_type,
                                                   max_results=10,
                                                   offset=offset)
