@@ -12,7 +12,15 @@ from info import CACHE_TIME, AUTH_USERS, AUTH_CHANNEL, CUSTOM_FILE_CAPTION
 logger = logging.getLogger(__name__)
 cache_time = 0 if AUTH_USERS or AUTH_CHANNEL else CACHE_TIME
 
-
+async def inline_users(query: InlineQuery):
+    if AUTH_USERS:
+        if query.from_user and query.from_user.id in AUTH_USERS:
+            return True
+        else:
+            return False
+    if query.from_user and query.from_user.id not in temp.BANNED_USERS:
+        return True
+    return False
 
 @Client.on_inline_query()
 async def answer(bot, query):
@@ -43,10 +51,7 @@ async def answer(bot, query):
 
     offset = int(query.offset or 0)
     reply_markup = get_reply_markup(bot.username, query=text)
-    files, next_offset, total = await get_search_results(text,
-                                                  file_type=file_type,
-                                                  max_results=10,
-                                                  offset=offset)
+    files, next_offset = await get_search_results(text, file_type=file_type, max_results=10, offset=offset)
 
     for file in files:
         title=file.file_name
@@ -92,11 +97,14 @@ async def answer(bot, query):
 
 
 def get_reply_markup(username, query):
+    url = 'trakteer.id/ccgnimeX'
     buttons = [
         [
-            InlineKeyboardButton('🔍 Cari Lagi', switch_inline_query_current_chat=query)
-        ]
-        ]
+            InlineKeyboardButton('🔍 Cari Lagi', switch_inline_query_current_chat=query),
+            InlineKeyboardButton('✲ Donasi', url=url),
+        ],
+        [InlineKeyboardButton('⌘ Daftar Anime', url="https://t.me/downloadanimebatch/302")]
+    ]
     return InlineKeyboardMarkup(buttons)
 
 
