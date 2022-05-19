@@ -47,7 +47,7 @@ async def answer(bot, query):
         file_type = None
 
     offset = int(query.offset or 0)
-    reply_markup = get_reply_markup(query=string)
+    reply_markup = get_reply_markup(bot.username, query=string)
     files, next_offset, total = await get_search_results(string,
                                                   file_type=file_type,
                                                   max_results=10,
@@ -74,9 +74,7 @@ async def answer(bot, query):
                 reply_markup=reply_markup))
 
     if results:
-        switch_pm_text = f"{emoji.FILE_FOLDER} Results - {total}"
-        if string:
-            switch_pm_text += f" for {string}"
+        switch_pm_text = f"{emoji.FILE_FOLDER} Tersedia - {total}"
         try:
             await query.answer(results=results,
                            is_personal = True,
@@ -89,9 +87,7 @@ async def answer(bot, query):
         except Exception as e:
             logging.exception(str(e))
     else:
-        switch_pm_text = f'{emoji.CROSS_MARK} No results'
-        if string:
-            switch_pm_text += f' for "{string}"'
+        switch_pm_text = f'{emoji.CROSS_MARK} Silahkan Request!'
 
         await query.answer(results=[],
                            is_personal = True,
@@ -100,7 +96,7 @@ async def answer(bot, query):
                            switch_pm_parameter="okay")
 
 
-def get_reply_markup(query):
+def get_reply_markup(username, query):
     buttons = [
         [
             InlineKeyboardButton('🔍 Cari Lagi', switch_inline_query_current_chat=query)
