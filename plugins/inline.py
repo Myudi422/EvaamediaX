@@ -1,8 +1,5 @@
 import logging
-from urllib.parse import quote
-
 from pyrogram import Client, emoji, filters
-from pyrogram.errors import UserNotParticipant
 from pyrogram.errors.exceptions.bad_request_400 import QueryIdInvalid
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultCachedDocument, InlineQuery
 from database.ia_filterdb import get_search_results
@@ -42,16 +39,19 @@ async def answer(bot, query):
 
     results = []
     if '|' in query.query:
-        text, file_type = query.query.split('|', maxsplit=1)
-        text = text.strip()
+        string, file_type = query.query.split('|', maxsplit=1)
+        string = string.strip()
         file_type = file_type.strip().lower()
     else:
-        text = query.query.strip()
+        string = query.query.strip()
         file_type = None
 
     offset = int(query.offset or 0)
-    reply_markup = get_reply_markup(bot.username, query=text)
-    files, next_offset = await get_search_results(text, file_type=file_type, max_results=10, offset=offset)
+    reply_markup = get_reply_markup(query=string)
+    files, next_offset, total = await get_search_results(string,
+                                                  file_type=file_type,
+                                                  max_results=10,
+                                                  offset=offset)
 
     for file in files:
         title=file.file_name
@@ -75,9 +75,10 @@ async def answer(bot, query):
 
     if results:
         switch_pm_text = f"{emoji.FILE_FOLDER} Tersedia - {total}"
+        if string:
+            switch_pm_text += f" for {string}"
         try:
             await query.answer(results=results,
-                           is_personal = True,
                            cache_time=cache_time,
                            switch_pm_text=switch_pm_text,
                            switch_pm_parameter="start",
@@ -88,23 +89,21 @@ async def answer(bot, query):
             logging.exception(str(e))
     else:
         switch_pm_text = f'{emoji.CROSS_MARK} Silahkan Request!'
+        if string:
+            switch_pm_text += f' for "{string}"'
 
         await query.answer(results=[],
-                           is_personal = True,
                            cache_time=cache_time,
                            switch_pm_text=switch_pm_text,
                            switch_pm_parameter="okay")
 
 
-def get_reply_markup(username, query):
-    url = 'trakteer.id/ccgnimeX'
+def get_reply_markup(query):
     buttons = [
         [
-            InlineKeyboardButton('🔍 Cari Lagi', switch_inline_query_current_chat=query),
-            InlineKeyboardButton('✲ Donasi', url=url),
-        ],
-        [InlineKeyboardButton('⌘ Daftar Anime', url="https://t.me/downloadanimebatch/302")]
-    ]
+            InlineKeyboardButton('Cari Lagi', switch_inline_query_current_chat=query)
+        ]
+        ]
     return InlineKeyboardMarkup(buttons)
 
 
