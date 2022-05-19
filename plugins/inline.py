@@ -1,5 +1,8 @@
 import logging
+from urllib.parse import quote
+
 from pyrogram import Client, emoji, filters
+from pyrogram.errors import UserNotParticipant
 from pyrogram.errors.exceptions.bad_request_400 import QueryIdInvalid
 from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, InlineQueryResultCachedDocument, InlineQuery
 from database.ia_filterdb import get_search_results
@@ -47,7 +50,7 @@ async def answer(bot, query):
         file_type = None
 
     offset = int(query.offset or 0)
-    reply_markup = get_reply_markup(bot.username, query=string)
+    reply_markup = get_reply_markup(bot, query=string)
     files, next_offset, total = await get_search_results(string,
                                                   file_type=file_type,
                                                   max_results=10,
